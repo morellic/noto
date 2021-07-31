@@ -25,7 +25,7 @@ ARGS:
 - grep
 - find
 - cat
-- vim note editing and vieing
+- vim note editing and viewing
 - note editing and viewing with other text editors? e.g. configurable
 - fancier note searching?
 - note tags?
