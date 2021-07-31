@@ -11,20 +11,17 @@ pub fn get_current_dir(w: &mut impl std::io::Write) -> Option<std::path::PathBuf
     }
 }
 
-pub fn get_read_dir(
-    pb: std::path::PathBuf,
-    w: &mut impl std::io::Write,
-) -> Option<std::fs::ReadDir> {
-    if pb.is_file() {
-        let msg = format!("{} is a file!", pb.file_name().unwrap().to_str().unwrap());
+pub fn get_read_dir(p: &std::path::Path, w: &mut impl std::io::Write) -> Option<std::fs::ReadDir> {
+    if p.is_file() {
+        let msg = format!("{} is a file!", p.file_name().unwrap().to_str().unwrap());
         out::write_line(msg, w);
         return None;
     }
 
-    match std::fs::read_dir(&pb) {
+    match std::fs::read_dir(&p) {
         Ok(rd) => Some(rd),
         Err(e) => {
-            let s = format!("Could not access the directory {}!\n{}", pb.display(), e);
+            let s = format!("Could not access the directory {}!\n{}", p.display(), e);
             out::write_line(s, w);
             None
         }
@@ -53,20 +50,20 @@ mod tests {
     fn _test_get_read_dir_with_file_path() {
         let mock_file_1_out = b"mock-file-1.txt is a file!\n";
         let mock_file_1_ret =
-            test_out_get_ret!(mock_file_1_out, get_read_dir, mock::get_mock_file_1_path());
+            test_out_get_ret!(mock_file_1_out, get_read_dir, &mock::get_mock_file_1_path());
         assert_eq!(mock_file_1_ret.is_some(), false);
     }
 
     fn _test_get_read_dir_with_dir_path() {
         let mock_dir_1_out = b"";
         let mock_dir_1_ret =
-            test_out_get_ret!(mock_dir_1_out, get_read_dir, mock::get_mock_dir_1_path());
+            test_out_get_ret!(mock_dir_1_out, get_read_dir, &mock::get_mock_dir_1_path());
         assert_eq!(mock_dir_1_ret.is_some(), true);
         assert_eq!(mock_dir_1_ret.unwrap().count(), 2);
 
         let mock_dir_2_out = b"";
         let mock_dir_2_ret =
-            test_out_get_ret!(mock_dir_2_out, get_read_dir, mock::get_mock_dir_2_path());
+            test_out_get_ret!(mock_dir_2_out, get_read_dir, &mock::get_mock_dir_2_path());
         assert_eq!(mock_dir_2_ret.is_some(), true);
         assert_eq!(mock_dir_2_ret.unwrap().count(), 0);
     }
