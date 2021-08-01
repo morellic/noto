@@ -13,13 +13,11 @@ fn main() {
     };
 
     if let Some(path) = get_path(&args, &mut printer) {
-        action::run_action(
-            action::ActionParams {
-                action_type: args.action_type,
-                path,
-                printer,
-            },
-        );
+        action::run_action(action::ActionParams {
+            action_type: args.action_type,
+            path,
+            printer,
+        });
     }
 }
 

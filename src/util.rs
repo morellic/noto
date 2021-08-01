@@ -7,15 +7,21 @@ pub mod test_util {
     /// Helpers to create mock objects, including paths to example files and directories under the
     /// example mock directory $project_dir/tests/mock_dir
     pub mod mock {
+
+        // -----------------------------
+        // Functions to get mock objects
+        // -----------------------------
+
         pub fn get_mock_printer() -> crate::util::printer::Printer<Vec<u8>, Vec<u8>> {
             crate::util::printer::Printer {
                 out: Vec::new(),
                 err_out: Vec::new(),
             }
         }
-        // --------------------------------------------------------------------
-        // Functions to get paths of examples under project_dir>/tests/mock_dir
-        // --------------------------------------------------------------------
+
+        // -------------------------------------------------------------------------
+        // Functions to get paths of mock examples under project_dir>/tests/mock_dir
+        // -------------------------------------------------------------------------
 
         // mock-dir/
         // └── mock-dir-1/
@@ -58,9 +64,9 @@ pub mod test_util {
         }
     }
 
-    // -----------------------
-    // Unit test helper macros
-    // -----------------------
+    // ----------------------------
+    // Helper macros for unit tests
+    // ----------------------------
 
     #[macro_export]
     macro_rules! assert_eq_bytes {
