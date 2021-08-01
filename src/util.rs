@@ -1,9 +1,5 @@
 pub mod fs;
-pub mod out;
-
-pub use fs::get_current_dir;
-pub use fs::get_read_dir;
-pub use out::write_line;
+pub mod printer;
 
 /// Helper modules, functions and macros to use in unit tests
 #[cfg(test)]
@@ -11,6 +7,12 @@ pub mod test_util {
     /// Helpers to create mock objects, including paths to example files and directories under the
     /// example mock directory $project_dir/tests/mock_dir
     pub mod mock {
+        pub fn get_mock_printer() -> crate::util::printer::Printer<Vec<u8>, Vec<u8>> {
+            crate::util::printer::Printer {
+                out: Vec::new(),
+                err_out: Vec::new(),
+            }
+        }
         // --------------------------------------------------------------------
         // Functions to get paths of examples under project_dir>/tests/mock_dir
         // --------------------------------------------------------------------
@@ -24,31 +26,31 @@ pub mod test_util {
         // └── mock-file-2.txt
 
         pub fn get_mock_dir_path() -> std::path::PathBuf {
-            _get_path(&[".", "tests", "mock-dir"])
+            std::path::PathBuf::from(r"./tests/mock-dir")
         }
 
         pub fn get_mock_dir_1_path() -> std::path::PathBuf {
-            _get_path(&[".", "tests", "mock-dir", "mock-dir-1"])
+            std::path::PathBuf::from(r"./tests/mock-dir/mock-dir-1")
         }
 
         pub fn get_mock_dir_1_1_path() -> std::path::PathBuf {
-            _get_path(&[".", "tests", "mock-dir", "mock-dir-1", "mock-dir-1-1"])
+            std::path::PathBuf::from(r"./tests/mock-dir/mock-dir-1/mock-dir-1-1")
         }
 
         pub fn get_mock_file_1_path() -> std::path::PathBuf {
-            _get_path(&[".", "tests", "mock-dir", "mock-file-1.txt"])
+            std::path::PathBuf::from(r"./tests/mock-dir/mock-file-1.txt")
         }
 
         pub fn get_mock_file_1_1_path() -> std::path::PathBuf {
-            _get_path(&[".", "tests", "mock-dir", "mock-dir-1", "mock-file-1-1.txt"])
+            std::path::PathBuf::from(r"./tests/mock-dir/mock-dir-1/mock-file-1-1.txt")
         }
 
         pub fn get_mock_file_2_path() -> std::path::PathBuf {
-            _get_path(&[".", "tests", "mock-dir", "mock-file-2.txt"])
+            std::path::PathBuf::from(r"./tests/mock-dir/mock-file-2.txt")
         }
 
         pub fn get_mock_dir_2_path() -> std::path::PathBuf {
-            _get_path(&[".", "tests", "mock-dir", "mock-dir-2"])
+            std::path::PathBuf::from(r"./tests/mock-dir/mock-dir-2")
         }
 
         fn _get_path(args: &[&str]) -> std::path::PathBuf {
@@ -67,40 +69,44 @@ pub mod test_util {
             assert_eq!(
                 std::str::from_utf8(&$bytes).unwrap(),
                 std::str::from_utf8($expected_bytes).unwrap(),
-                "\ngot right but expected left"
+                "\ngot left but expected right"
             );
         };
     }
 
     #[macro_export]
-    macro_rules! test_out {
-        ($expected_out:expr, $func:expr) => {
-            let mut out = Vec::new();
-            $func(&mut out);
-            crate::assert_eq_bytes!(out, $expected_out);
+    macro_rules! assert_outs {
+        ($expected_out:expr, $expected_err_out:expr, $func:expr) => {
+            let mut printer = crate::util::test_util::mock::get_mock_printer();
+            $func(&mut printer);
+            crate::assert_eq_bytes!(printer.out, $expected_out);
+            crate::assert_eq_bytes!(printer.err_out, $expected_err_out);
         };
-        ($expected_out:expr, $func:expr, $($args:expr),*) => {
+        ($expected_out:expr, $expected_err_out:expr, $func:expr, $($args:expr),*) => {
             $(
-                let mut out = Vec::new();
-                $func($args, &mut out);
-                crate::assert_eq_bytes!(out, $expected_out);
+                let mut printer = crate::util::test_util::mock::get_mock_printer();
+                $func($args, &mut printer);
+                crate::assert_eq_bytes!(printer.out, $expected_out);
+                crate::assert_eq_bytes!(printer.err_out, $expected_err_out);
             )*
         }
     }
 
     #[macro_export]
-    macro_rules! test_out_get_ret {
-        ($expected_out:expr, $func:expr) => {{
-            let mut out = Vec::new();
-            let ret = $func(&mut out);
-            crate::assert_eq_bytes!(out, $expected_out);
+    macro_rules! assert_outs_get_ret {
+        ($expected_out:expr, $expected_err_out:expr, $func:expr) => {{
+            let mut printer = crate::util::test_util::mock::get_mock_printer();
+            let ret = $func(&mut printer);
+            crate::assert_eq_bytes!(printer.out, $expected_out);
+            crate::assert_eq_bytes!(printer.err_out, $expected_err_out);
             ret
         }};
-        ($expected_out:expr, $func:expr, $($args:expr),*) => {{
+        ($expected_out:expr, $expected_err_out:expr, $func:expr, $($args:expr),*) => {{
             $(
-                let mut out = Vec::new();
-                let ret = $func($args, &mut out);
-                crate::assert_eq_bytes!(out, $expected_out);
+                let mut printer = crate::util::test_util::mock::get_mock_printer();
+                let ret = $func($args, &mut printer);
+                crate::assert_eq_bytes!(printer.out, $expected_out);
+                crate::assert_eq_bytes!(printer.err_out, $expected_err_out);
                 ret
             )*
         }}

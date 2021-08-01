@@ -5,19 +5,30 @@ mod util;
 use structopt::StructOpt;
 
 fn main() {
-    let mut w = std::io::stdout();
     let args = cli::Args::from_args();
-    let path = get_path(&args, &mut w);
-    match args.action_type {
-        action::ActionType::Find => (), // TODO: impl action::find
-        action::ActionType::Grep => (), // TODO: impl action::grep
-        action::ActionType::Ls => action::ls(&path, &mut w),
+
+    let mut printer = util::printer::Printer {
+        out: std::io::stdout(),
+        err_out: std::io::stderr(),
+    };
+
+    if let Some(path) = get_path(&args, &mut printer) {
+        action::run_action(
+            action::ActionParams {
+                action_type: args.action_type,
+                path,
+                printer,
+            },
+        );
     }
 }
 
-fn get_path(args: &cli::Args, w: &mut impl std::io::Write) -> std::path::PathBuf {
+fn get_path<Out: std::io::Write, ErrOut: std::io::Write>(
+    args: &cli::Args,
+    mut printer: &mut util::printer::Printer<Out, ErrOut>,
+) -> Option<std::path::PathBuf> {
     if args.path.is_some() {
-        return args.path.clone().unwrap();
+        return args.path.clone();
     }
-    util::fs::get_current_dir(w).unwrap()
+    util::fs::get_current_dir(&mut printer)
 }

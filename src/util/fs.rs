@@ -1,28 +1,33 @@
-use crate::util::out;
+use crate::util::printer;
 
-pub fn get_current_dir(w: &mut impl std::io::Write) -> Option<std::path::PathBuf> {
+pub fn get_current_dir<Out: std::io::Write, ErrOut: std::io::Write>(
+    printer: &mut printer::Printer<Out, ErrOut>,
+) -> Option<std::path::PathBuf> {
     match std::env::current_dir() {
         Ok(dir) => Some(dir),
         Err(e) => {
-            let msg = format!("Could not access the current directory!\n{}", e);
-            out::write_line(msg, w);
+            let err_msg = format!("Could not access the current directory!\n{}", e);
+            printer.write_err_line(err_msg);
             None
         }
     }
 }
 
-pub fn get_read_dir(p: &std::path::Path, w: &mut impl std::io::Write) -> Option<std::fs::ReadDir> {
-    if p.is_file() {
-        let msg = format!("{} is a file!", p.file_name().unwrap().to_str().unwrap());
-        out::write_line(msg, w);
+pub fn get_read_dir<Out: std::io::Write, ErrOut: std::io::Write>(
+    path: &std::path::Path,
+    printer: &mut printer::Printer<Out, ErrOut>,
+) -> Option<std::fs::ReadDir> {
+    if path.is_file() {
+        let err_msg = format!("{} is a file!", path.file_name().unwrap().to_str().unwrap());
+        printer.write_err_line(err_msg);
         return None;
     }
 
-    match std::fs::read_dir(&p) {
+    match std::fs::read_dir(&path) {
         Ok(rd) => Some(rd),
         Err(e) => {
-            let s = format!("Could not access the directory {}!\n{}", p.display(), e);
-            out::write_line(s, w);
+            let err_msg = format!("Could not access the directory {}!\n{}", path.display(), e);
+            printer.write_err_line(err_msg);
             None
         }
     }
@@ -32,13 +37,13 @@ pub fn get_read_dir(p: &std::path::Path, w: &mut impl std::io::Write) -> Option<
 mod tests {
     use super::*;
 
-    use crate::test_out_get_ret;
+    use crate::assert_outs_get_ret;
     use crate::util::test_util::mock;
 
     #[test]
     fn test_get_current_dir() {
-        let pb = test_out_get_ret!(b"", get_current_dir);
-        assert_eq!(pb.is_some(), true);
+        let ret = assert_outs_get_ret!(b"", b"", get_current_dir);
+        assert_eq!(ret.is_some(), true);
     }
 
     #[test]
@@ -48,22 +53,23 @@ mod tests {
     }
 
     fn _test_get_read_dir_with_file_path() {
-        let mock_file_1_out = b"mock-file-1.txt is a file!\n";
-        let mock_file_1_ret =
-            test_out_get_ret!(mock_file_1_out, get_read_dir, &mock::get_mock_file_1_path());
+        let mock_file_1_ret = assert_outs_get_ret!(
+            b"",
+            b"mock-file-1.txt is a file!\n",
+            get_read_dir,
+            &mock::get_mock_file_1_path()
+        );
         assert_eq!(mock_file_1_ret.is_some(), false);
     }
 
     fn _test_get_read_dir_with_dir_path() {
-        let mock_dir_1_out = b"";
         let mock_dir_1_ret =
-            test_out_get_ret!(mock_dir_1_out, get_read_dir, &mock::get_mock_dir_1_path());
+            assert_outs_get_ret!(b"", b"", get_read_dir, &mock::get_mock_dir_1_path());
         assert_eq!(mock_dir_1_ret.is_some(), true);
         assert_eq!(mock_dir_1_ret.unwrap().count(), 2);
 
-        let mock_dir_2_out = b"";
         let mock_dir_2_ret =
-            test_out_get_ret!(mock_dir_2_out, get_read_dir, &mock::get_mock_dir_2_path());
+            assert_outs_get_ret!(b"", b"", get_read_dir, &mock::get_mock_dir_2_path());
         assert_eq!(mock_dir_2_ret.is_some(), true);
         assert_eq!(mock_dir_2_ret.unwrap().count(), 0);
     }

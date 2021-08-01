@@ -1,54 +1,81 @@
+use crate::action::ActionParams;
 use crate::util::fs;
-use crate::util::out;
+use crate::util::printer;
 
-pub fn ls(p: &std::path::Path, w: &mut impl std::io::Write) {
-    if let Some(rd) = fs::get_read_dir(p, w) {
-        for entry in rd.flatten() {
-            ls_entry(&entry.path(), w);
-        }
+pub fn ls(mut params: ActionParams) {
+    ls_path(&params.path, &mut params.printer);
+}
+
+fn ls_path<Out: std::io::Write, ErrOut: std::io::Write>(
+    path: &std::path::Path,
+    mut printer: &mut printer::Printer<Out, ErrOut>,
+) {
+    if let Some(rd) = fs::get_read_dir(&path, &mut printer) {
+        rd.flatten()
+            .for_each(|entry| ls_entry(&entry.path(), &mut printer));
     }
 }
 
-fn ls_entry(p: &std::path::Path, w: &mut impl std::io::Write) {
-    let entry_name = p.file_name().unwrap().to_str().unwrap();
-    out::write_line(entry_name.to_string(), w);
+fn ls_entry<Out: std::io::Write, ErrOut: std::io::Write>(
+    path: &std::path::Path,
+    printer: &mut printer::Printer<Out, ErrOut>,
+) {
+    let entry_name = path.file_name().unwrap().to_str().unwrap();
+    printer.write_line(entry_name.to_string());
 }
 
 #[cfg(test)]
 mod tests {
-    use super::ls;
     use super::ls_entry;
+    use super::ls_path;
 
-    use crate::test_out;
+    use crate::assert_outs;
     use crate::util::test_util::mock;
 
     #[test]
     fn test_ls() {
-        let mock_dir_out = b"mock-dir-1\nmock-dir-2\nmock-file-1.txt\nmock-file-2.txt\n";
-        test_out!(mock_dir_out, ls, &mock::get_mock_dir_path());
+        assert_outs!(
+            b"mock-dir-1\nmock-dir-2\nmock-file-1.txt\nmock-file-2.txt\n",
+            b"",
+            ls_path,
+            &mock::get_mock_dir_path()
+        );
 
-        let mock_dir_1_out = b"mock-dir-1-1\nmock-file-1-1.txt\n";
-        test_out!(mock_dir_1_out, ls, &mock::get_mock_dir_1_path());
+        assert_outs!(
+            b"mock-dir-1-1\nmock-file-1-1.txt\n",
+            b"",
+            ls_path,
+            &mock::get_mock_dir_1_path()
+        );
 
-        let mock_dir_2_out = b"";
-        test_out!(mock_dir_2_out, ls, &mock::get_mock_dir_2_path());
+        assert_outs!(b"", b"", ls_path, &mock::get_mock_dir_2_path());
 
-        let mock_dir_1_1_out = b"";
-        test_out!(mock_dir_1_1_out, ls, &mock::get_mock_dir_1_1_path());
+        assert_outs!(b"", b"", ls_path, &mock::get_mock_dir_1_1_path());
     }
 
     #[test]
     fn test_ls_entry() {
-        let mock_dir_1_out = b"mock-dir-1\n";
-        test_out!(mock_dir_1_out, ls_entry, &mock::get_mock_dir_1_path());
+        assert_outs!(b"mock-dir-1\n", b"", ls_entry, &mock::get_mock_dir_1_path());
 
-        let mock_file_1_out = b"mock-file-1.txt\n";
-        test_out!(mock_file_1_out, ls_entry, &mock::get_mock_file_1_path());
+        assert_outs!(
+            b"mock-file-1.txt\n",
+            b"",
+            ls_entry,
+            &mock::get_mock_file_1_path()
+        );
 
-        let mock_file_2_out = b"mock-file-2.txt\n";
-        test_out!(mock_file_2_out, ls_entry, &mock::get_mock_file_2_path());
+        assert_outs!(
+            b"mock-file-2.txt\n",
+            b"",
+            ls_entry,
+            &mock::get_mock_file_2_path()
+        );
 
-        let mock_file_1_1_out = b"mock-file-1-1.txt\n";
-        test_out!(mock_file_1_1_out, ls_entry, &mock::get_mock_file_1_1_path());
+        assert_outs!(
+            b"mock-file-1-1.txt\n",
+            b"",
+            ls_entry,
+            &mock::get_mock_file_1_1_path()
+        );
     }
 }
