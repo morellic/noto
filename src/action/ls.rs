@@ -18,10 +18,11 @@ fn ls_path<Out: std::io::Write, ErrOut: std::io::Write>(
 
 fn ls_entry<Out: std::io::Write, ErrOut: std::io::Write>(
     path: &std::path::Path,
-    printer: &mut printer::Printer<Out, ErrOut>,
+    mut printer: &mut printer::Printer<Out, ErrOut>,
 ) {
-    let entry_name = path.file_name().unwrap().to_str().unwrap();
-    printer.write_line(entry_name.to_string());
+    if let Some(name) = fs::get_file_or_dir_name(&path, &mut printer) {
+        printer.write_line(name);
+    }
 }
 
 #[cfg(test)]

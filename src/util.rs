@@ -59,6 +59,10 @@ pub mod test_util {
             std::path::PathBuf::from(r"./tests/mock-dir/mock-dir-2")
         }
 
+        pub fn get_non_existing_path() -> std::path::PathBuf {
+            std::path::PathBuf::from(r"./this/does/not/exist/42")
+        }
+
         fn _get_path(args: &[&str]) -> std::path::PathBuf {
             args.iter().collect()
         }
