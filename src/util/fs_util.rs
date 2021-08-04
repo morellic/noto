@@ -104,10 +104,6 @@ pub mod test_util {
         std::path::PathBuf::from(r"./examples/mock-dir/mock-dir-1")
     }
 
-    pub fn get_mock_dir_1_1_path() -> std::path::PathBuf {
-        std::path::PathBuf::from(r"./examples/mock-dir/mock-dir-1/mock-dir-1-1")
-    }
-
     pub fn get_mock_file_1_path() -> std::path::PathBuf {
         std::path::PathBuf::from(r"./examples/mock-dir/mock-file-1.txt")
     }
@@ -118,10 +114,6 @@ pub mod test_util {
 
     pub fn get_mock_file_2_path() -> std::path::PathBuf {
         std::path::PathBuf::from(r"./examples/mock-dir/mock-file-2.txt")
-    }
-
-    pub fn get_mock_dir_2_path() -> std::path::PathBuf {
-        std::path::PathBuf::from(r"./examples/mock-dir/mock-dir-2")
     }
 
     pub fn get_non_existing_path() -> std::path::PathBuf {
@@ -156,13 +148,19 @@ mod tests {
     }
 
     fn _test_get_read_dir_with_dir_path() {
-        let mock_dir_1_res = get_read_dir(&test_util::get_mock_dir_1_path());
+        let mock_dir_1_res = get_read_dir(&test_util::get_mock_dir_path());
         assert_eq!(mock_dir_1_res.is_ok(), true);
-        assert_eq!(mock_dir_1_res.unwrap().count(), 2);
+        assert_eq!(mock_dir_1_res.unwrap().count(), 3);
 
-        let mock_dir_2_res = get_read_dir(&test_util::get_mock_dir_2_path());
+        let mock_dir_2_res = get_read_dir(&test_util::get_mock_dir_1_path());
         assert_eq!(mock_dir_2_res.is_ok(), true);
-        assert_eq!(mock_dir_2_res.unwrap().count(), 0);
+        assert_eq!(mock_dir_2_res.unwrap().count(), 1);
+    }
+
+    fn _test_get_read_dir_with_non_existing_path() {
+        let mock_dir_1_res = get_read_dir(&test_util::get_non_existing_path());
+        assert_eq!(mock_dir_1_res.is_err(), true);
+        assert_eq!(mock_dir_1_res.unwrap_err(), FsErr::DirReadErr);
     }
 
     #[test]

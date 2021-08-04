@@ -24,18 +24,9 @@ pub mod test_util {
         ($printer:expr, $out:expr, $err_out:expr) => {
             let out = &$out.as_bytes();
             let err_out = &$err_out.as_bytes();
-            crate::util::printer::test_util::assert_eq_bytes(&$printer.out, out);
-            crate::util::printer::test_util::assert_eq_bytes(&$printer.err_out, &$err_out);
+            crate::assert_eq_bytes!(&$printer.out, out);
+            crate::assert_eq_bytes!(&$printer.err_out, err_out);
         };
-    }
-
-    pub fn assert_eq_bytes(out: &[u8], expected_out: &[u8]) {
-        // compare as str for a better fail message
-        assert_eq!(
-            std::str::from_utf8(&out).unwrap(),
-            std::str::from_utf8(&expected_out).unwrap(),
-            "\ngot left but expected right"
-        );
     }
 
     pub fn get_mock_printer() -> crate::util::printer::Printer<Vec<u8>, Vec<u8>> {

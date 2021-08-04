@@ -68,16 +68,14 @@ mod tests {
     fn test_ls() {
         _test_ls(
             fs_util::test_util::get_mock_dir_path(),
-            "mock-dir-1\nmock-dir-2\nmock-file-1.txt\nmock-file-2.txt\n",
+            "mock-dir-1\nmock-file-1.txt\nmock-file-2.txt\n",
             "",
         );
         _test_ls(
             fs_util::test_util::get_mock_dir_1_path(),
-            "mock-dir-1-1\nmock-file-1-1.txt\n",
+            "mock-file-1-1.txt\n",
             "",
         );
-        _test_ls(fs_util::test_util::get_mock_dir_2_path(), "", "");
-        _test_ls(fs_util::test_util::get_mock_dir_1_1_path(), "", "");
     }
 
     fn _test_ls(path: std::path::PathBuf, expected_out: &str, expected_err_out: &str) {
