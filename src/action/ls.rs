@@ -17,14 +17,14 @@ impl<Out: std::io::Write, ErrOut: std::io::Write> LsAction<Out, ErrOut> {
                     self.ls_entry(&entry.path())
                 }
             }
-            Err(e) => self.printer.write_err_line(format!("{}", e)),
+            Err(e) => self.printer.write_err_line(e),
         }
     }
 
     fn ls_entry(&mut self, path: &std::path::Path) {
         match fs_util::get_file_or_dir_name(&path) {
             Ok(name) => self.printer.write_line(name),
-            Err(e) => self.printer.write_err_line(format!("{}", e)),
+            Err(e) => self.printer.write_err_line(e),
         }
     }
 }
@@ -34,7 +34,7 @@ impl<Out: std::io::Write, ErrOut: std::io::Write> Action<Out, ErrOut> for LsActi
         match fs_util::get_path_or_current_dir(args.path) {
             Ok(path) => Ok(LsAction { path, printer }),
             Err(e) => {
-                printer.write_err_line(format!("{}", e));
+                printer.write_err_line(e);
                 Err(ActionErr::CreateErr)
             }
         }
