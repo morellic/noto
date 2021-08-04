@@ -83,11 +83,7 @@ mod tests {
     fn _test_ls(path: std::path::PathBuf, expected_out: &str, expected_err_out: &str) {
         let mut ls_action = get_mock_ls_action(path);
         ls_action.ls();
-        assert_printer_outs!(
-            ls_action.printer,
-            expected_out.as_bytes(),
-            expected_err_out.as_bytes()
-        );
+        assert_printer_outs!(ls_action.printer, expected_out, expected_err_out);
     }
 
     #[test]
@@ -117,10 +113,6 @@ mod tests {
     fn _test_ls_entry(path: &std::path::PathBuf, expected_out: &str, expected_err_out: &str) {
         let mut ls_action = get_mock_ls_action(fs_util::test_util::get_mock_dir_path());
         ls_action.ls_entry(&path);
-        assert_printer_outs!(
-            ls_action.printer,
-            expected_out.as_bytes(),
-            expected_err_out.as_bytes()
-        );
+        assert_printer_outs!(ls_action.printer, expected_out, expected_err_out);
     }
 }

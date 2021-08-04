@@ -22,7 +22,9 @@ pub mod test_util {
     #[macro_export]
     macro_rules! assert_printer_outs {
         ($printer:expr, $out:expr, $err_out:expr) => {
-            crate::util::printer::test_util::assert_eq_bytes(&$printer.out, &$out);
+            let out = &$out.as_bytes();
+            let err_out = &$err_out.as_bytes();
+            crate::util::printer::test_util::assert_eq_bytes(&$printer.out, out);
             crate::util::printer::test_util::assert_eq_bytes(&$printer.err_out, &$err_out);
         };
     }
@@ -56,7 +58,7 @@ mod tests {
         let out = [line, ""].join("\n");
         let err_out = "";
         printer.write_line(line.to_string());
-        assert_printer_outs!(printer, out.as_bytes(), err_out.as_bytes());
+        assert_printer_outs!(printer, out, err_out);
     }
 
     #[test]
@@ -66,6 +68,6 @@ mod tests {
         let out = "";
         let err_out = [line, ""].join("\n");
         printer.write_err_line(line.to_string());
-        assert_printer_outs!(printer, out.as_bytes(), err_out.as_bytes());
+        assert_printer_outs!(printer, out, err_out);
     }
 }
