@@ -12,6 +12,16 @@ pub struct Args {
 }
 
 #[cfg(test)]
+pub mod test_util {
+    use super::ActionType;
+    use super::Args;
+
+    pub fn get_mock_args(action_type: ActionType, path: Option<std::path::PathBuf>) -> Args {
+        Args { action_type, path }
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
 
