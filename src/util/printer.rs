@@ -19,18 +19,10 @@ impl<Out: std::io::Write, ErrOut: std::io::Write> Printer<Out, ErrOut> {
 
 #[cfg(test)]
 pub mod test_util {
-    #[macro_export]
-    macro_rules! assert_printer_outs {
-        ($printer:expr, $out:expr, $err_out:expr) => {
-            let out = &$out.as_bytes();
-            let err_out = &$err_out.as_bytes();
-            crate::assert_eq_bytes!(&$printer.out, out);
-            crate::assert_eq_bytes!(&$printer.err_out, err_out);
-        };
-    }
+    use super::Printer;
 
-    pub fn get_mock_printer() -> crate::util::printer::Printer<Vec<u8>, Vec<u8>> {
-        crate::util::printer::Printer {
+    pub fn get_mock_printer() -> Printer<Vec<u8>, Vec<u8>> {
+        Printer {
             out: Vec::new(),
             err_out: Vec::new(),
         }
