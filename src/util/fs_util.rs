@@ -52,12 +52,10 @@ pub fn get_file_name(path: &std::path::Path) -> Result<String, FsErr> {
         return Err(FsErr::PathIsNotFileErr);
     }
 
-    let name = path.file_name();
-    if name.is_none() {
-        return Err(FsErr::FileNameReadErr);
+    match path.file_name() {
+        Some(name) => Ok(name.to_str().unwrap().to_owned()),
+        None => Err(FsErr::FileNameReadErr),
     }
-
-    Ok(name.unwrap().to_str().unwrap().to_owned())
 }
 
 pub fn get_dir_name(path: &std::path::Path) -> Result<String, FsErr> {
@@ -65,12 +63,10 @@ pub fn get_dir_name(path: &std::path::Path) -> Result<String, FsErr> {
         return Err(FsErr::PathIsNotDirErr);
     }
 
-    let name = path.file_name();
-    if name.is_none() {
-        return Err(FsErr::DirNameReadErr);
+    match path.file_name() {
+        Some(name) => Ok(name.to_str().unwrap().to_owned()),
+        None => Err(FsErr::DirNameReadErr),
     }
-
-    Ok(name.unwrap().to_str().unwrap().to_owned())
 }
 
 pub fn get_path_or_current_dir(
