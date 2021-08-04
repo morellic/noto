@@ -7,4 +7,4 @@ edition = "2018"
 
 [dependencies]
 structopt = { version = "0.3" }
-thiserror = "1.0"
+thiserror = { version = "1.0" }
